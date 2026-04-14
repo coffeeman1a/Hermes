@@ -61,7 +61,7 @@ class TGClient:
         time_str = TGClient.escape_md(time_str)
 
         return (
-            "🚨 *INCIDENT ALERT*\n\n"
+            "🚨 *INCIDENT ALERT* 🚨\n\n"
             f"📨 *From:* {sender}\n"
             f"📝 *Subject:* {subject}\n"
             f"🕒 *Time:* {time_str}\n\n"

@@ -37,7 +37,7 @@ class ImapClient:
         inbox_emails = []
         # смотрим входящие
         self.mail.select("inbox")
-        status, messages = self.mail.search(None, 'SEEN')
+        status, messages = self.mail.search(None, 'UNSEEN')
         if status != "OK":
             logger.error("IMAP search failed")
 
