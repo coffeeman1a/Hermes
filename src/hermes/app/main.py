@@ -1,8 +1,8 @@
 import time
 import logging
-from config import load_config, setup_logging
-from  imap_client import ImapClient
-from tg_client import TGClient
+from hermes.app.config import load_config, setup_logging
+from  hermes.app.imap_client import ImapClient
+from hermes.app.tg_client import TGClient
 
 logger = logging.getLogger(__name__)
 

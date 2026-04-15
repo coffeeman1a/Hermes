@@ -5,17 +5,17 @@ import logging
 from email.message import Message
 from email.utils import parseaddr, parsedate_to_datetime
 from bs4 import BeautifulSoup
-from models.email_message import EmailMessage
+from hermes.models.email_message import EmailMessage
 from email.header import decode_header
 
 logger = logging.getLogger(__name__)
 
 class ImapClient:
-    def __init__(self, server: str, user: str, password: str, whitelist: bool, whitelist_emails: list[str]=[]):
+    def __init__(self, server: str, user: str, password: str, whitelist: bool, whitelist_emails: list[str] | None = None):
         self.mail = imaplib.IMAP4_SSL(server) # создаём клиент
         self.mail.login(user, password)
         self.whitelist = whitelist
-        self.whitelist_emails = whitelist_emails
+        self.whitelist_emails = whitelist_emails or []
 
     @staticmethod
     def decode_mime_header(value: str) -> str:
@@ -61,7 +61,7 @@ class ImapClient:
             try:
                 received_at = parsedate_to_datetime(date_raw)
             except Exception:
-                received_at = datetime.now()
+                received_at = datetime.datetime.now()
 
             text = ImapClient.parse_message(msg)
             

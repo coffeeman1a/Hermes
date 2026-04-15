@@ -2,7 +2,8 @@ import datetime
 import re
 import requests
 import logging
-from models.email_message import EmailMessage
+import time
+from hermes.models.email_message import EmailMessage
 
 logger = logging.getLogger(__name__)
 
@@ -20,24 +21,36 @@ class TGClient:
             text=email_message.text,
         )
 
-        response = requests.post(
-            f"{self.api}/bot{self.token}/sendMessage",
-            json={
-                "chat_id": self.chat_id,
-                "text": text,
-                "parse_mode": "MarkdownV2",
-            },
-            timeout=5,
-        )
+        for attempt in range(3):
+            try:
+                response = requests.post(
+                    f"{self.api}/bot{self.token}/sendMessage",
+                    json={
+                        "chat_id": self.chat_id,
+                        "text": text,
+                        "parse_mode": "MarkdownV2",
+                    },
+                    timeout=5,
+                )
 
-        if response.ok:
-            logger.info("Telegram message sent successfully, status=%s", response.status_code)
-        else:
-            logger.error(
-                "Telegram API error, status=%s, response=%s",
-                response.status_code,
-                response.text,
-            )
+                if response.ok:
+                    logger.info("Telegram message sent successfully, status=%s", response.status_code)
+                    return
+                else:
+                    logger.warning(
+                        "Telegram API error, status=%s, attempt=%s response=%s",
+                        response.status_code,
+                        attempt + 1,
+                        response.text,
+                    )
+                
+            except requests.RequestException as e:
+                logger.warning("Request failed, attempt=%s error=%s", attempt + 1, e)
+            
+            if attempt < 2:
+                time.sleep(2)
+        
+        logger.error("Failed to send Telegram message after 3 attempts")
 
 
     @staticmethod

@@ -1,7 +1,7 @@
 import os
 import logging
 import sys
-from models.app_config import Config
+from hermes.models.app_config import Config
 from dotenv import load_dotenv
 
 def load_config() -> Config:
@@ -10,7 +10,7 @@ def load_config() -> Config:
     imap_host = os.getenv("IMAP_HOST")
     email_login = os.getenv("EMAIL_LOGIN")
     email_password = os.getenv("EMAIL_PASSWORD")
-    whitelist = os.getenv("WHITELIST")
+    whitelist = str_to_bool(os.getenv("WHITELIST"))
     emails = os.getenv("WHITELIST_EMAILS")
     if emails:
         whitelist_emails = [e.strip() for e in emails.split(",") if e.strip()]
@@ -32,7 +32,7 @@ def load_config() -> Config:
     if not tg_token:
         missing.append("TG_TOKEN")
     if not chat_id:
-        missing.append("TG_CHAT_ID")
+        missing.append("CHAT_ID")
     if not imap_host:
         missing.append("IMAP_HOST")
     if not email_login:
@@ -40,7 +40,7 @@ def load_config() -> Config:
     if not email_password:
         missing.append("EMAIL_PASSWORD")
     if whitelist and len(whitelist_emails) == 0:
-        missing.append("EMAILS_LIST")
+        missing.append("WHITELIST_EMAILS")
     
     if missing:
         raise ValueError(f"Missing required environment variables: {', '.join(missing)}")
@@ -53,13 +53,15 @@ def load_config() -> Config:
         email_login=email_login,
         email_password=email_password,
         poll_interval=int(poll_interval),
-        whitelist=str_to_bool(whitelist),
+        whitelist=whitelist,
         log_level=log_level,
         whitelist_emails=whitelist_emails,
     )
 
 def str_to_bool(value: str) -> bool:
-    return value.lower() in ("true")
+    if not value:
+        return False
+    return value.lower() == "true"
 
 def setup_logging(log_level: str) -> None:
     level = getattr(logging, log_level.upper(), logging.INFO)
